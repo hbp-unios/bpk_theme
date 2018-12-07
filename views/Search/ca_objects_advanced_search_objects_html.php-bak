@@ -1,0 +1,151 @@
+<?php
+require_once(__CA_MODELS_DIR__."/ca_sets.php");
+include_once(__CA_LIB_DIR__."/ca/Search/OccurrenceSearch.php");
+include_once(__CA_LIB_DIR__."/ca/Search/ObjectSearch.php");
+include_once(__CA_MODELS_DIR__."/ca_occurrences.php");
+$va_access_values = caGetUserAccessValues($this->request);
+    if($vs_set_code = $this->request->config->get("featured_art_set")){
+        AssetLoadManager::register("carousel");
+        $t_set = new ca_sets();
+        $t_set->load(array('set_code' => $vs_set_code));
+        # Enforce access control on set
+        if((sizeof($va_access_values) == 0) || (sizeof($va_access_values) && in_array($t_set->get("access"), $va_access_values))){
+            $va_item_ids = array_keys(is_array($va_tmp = $t_set->getItemRowIDs(array('checkAccess' => $va_access_values, 'shuffle' => 0))) ? $va_tmp : array());
+        }
+        if(is_array($va_item_ids) && sizeof($va_item_ids)){
+            $t_object = new ca_objects();
+            $va_item_media = $t_object->getPrimaryMediaForIDs($va_item_ids, array("slideshowsmall"), array('checkAccess' => caGetUserAccessValues($this->request)));
+        }
+    }   
+?>
+<div class="container">
+	<div class="row">
+		<div class="col-sm-8 ">
+			<h1>Erweiterte Suche: Postkarten</h1>
+            <div id="builder"></div>
+
+
+      <p>Bitte geben Sie Ihre Suchbegriffe in die Maske ein.</p>
+      {{{form}}}
+        <div class='advancedContainer'>
+            <div class='row'><!-- Volltext -->
+          			<div class="advancedSearchField col-sm-6">
+    			        Alle Felder:<br/>
+    			         {{{_fulltext%width=50%&height=1}}}
+                 </div>
+                 <div class="advancedSearchField col-sm-6">
+    			         <br/>{{{_fulltext:boolean}}}
+    			       </div>
+    		    </div>
+    	      <div class='row'><!-- Titel, ID, Signatur -->
+          		 <div class="advancedSearchField col-sm-6">
+          			Titel:<br/>
+          			{{{ca_objects.preferred_labels.name%width=50%}}}
+                <!-- {{{multi_label_search%width=80%}}} -->
+          		 </div>
+               <div class="advancedSearchField col-sm-6">
+                   <br/>{{{ca_objects.preferred_labels:boolean}}}
+                 </div>
+          		 <div class="advancedSearchField col-sm-6">
+          			ID: (Format: os_ub_0000000)<br/>
+          			{{{ca_objects.idno%width=50%}}}
+          		 </div>
+               <div class="advancedSearchField col-sm-6">
+                   <br/>{{{ca_objects.idno:boolean}}}
+                 </div>
+               <div class="advancedSearchField col-sm-6">
+                Alte Signatur:<br/>
+                {{{ca_objects.signatur%width=50%}}}
+                 </div>
+               <div class="advancedSearchField col-sm-6">
+                   <br/>{{{ca_objects.signatur:boolean}}}
+                 </div>
+              </div>
+              <div class='row'><!-- Titel, ID, Signatur -->
+               <div class="advancedSearchField col-sm-6">
+                Frankierung:<br/>
+                {{{ca_objects.ca_list_items%width=50%}}}
+               </div>
+               <div class="advancedSearchField col-sm-6">
+                   <br/>{{{ca_objects.preferred_labels:boolean}}}
+                 </div>
+               <div class="advancedSearchField col-sm-6">
+                ID: (Format: os_ub_0000000)<br/>
+                {{{ca_objects.idno%width=50%}}}
+               </div>
+               <div class="advancedSearchField col-sm-6">
+                   <br/>{{{ca_objects.idno:boolean}}}
+                 </div>
+               <div class="advancedSearchField col-sm-6">
+                Alte Signatur:<br/>
+                {{{ca_objects.signatur%width=50%}}}
+                 </div>
+               <div class="advancedSearchField col-sm-6">
+                   <br/>{{{ca_objects.signatur:boolean}}}
+                 </div>
+              </div>
+            <div class='row'>
+              <div class="advancedSearchField col-sm-12">
+               Kommentar:<br/>
+               {{{ca_objects.kommentar}}}
+              </div>
+              <div class="advancedSearchField col-sm-12">
+               Ort: (durchsucht auch die Orte der Hersteller der Karten)<br/>
+               {{{ca_objects_x_places%width=50%}}}
+              </div>
+              <div class="advancedSearchField col-sm-12">
+               Sprache:<br/>
+               {{{ca_objects.language}}}
+              </div>
+            </div>
+    	      <div class='row'>
+              <div class="advancedSearchField col-sm-12">
+                Typ:<br/>
+                {{{ca_objects.type_id}}}
+              </div>
+              <div class="advancedSearchField col-sm-12">
+                Datum oder Zeitspanne <i>(z. B.: "25.09.1907" oder "Januar" oder "1914-1918")</i><br/>
+                {{{ca_objects.date.dates_value%width=50%}}}
+              </div>
+              <div class="advancedSearchField col-sm-12">
+	            Tags:<br/>
+	            {{{ca_item_tags.tag%width=50%}}}
+               </div>
+            </div>
+            <div class='row'>
+              <div class="advancedSearchField col-sm-12">
+                Kartentypus:<br/>
+                {{{ca_objects.kartentypus}}}
+              </div>
+              <div class="advancedSearchField col-sm-12">
+                Seriennummer<br/>
+                {{{ca_objects.seriennummer%width=50%}}}
+              </div>
+              <div class="advancedSearchField col-sm-12">
+              Tags:<br/>
+              {{{ca_item_tags.tag%width=50%}}}
+               </div>
+            </div>
+        </div><!-- close advanced container --> 
+
+       	<br style="clear: both;"/>
+       	<div style="float: right; margin-left: 20px;"><i class="fa fa-undo" aria-hidden="true"></i> {{{reset%label=Zurücksetzen}}}</div>
+       	<div style="float: right;"><i class="fa fa-search" aria-hidden="true"></i> {{{submit%label=Suchen}}}</div> 
+
+                <span class="btn btn-default" >{{{submit%label=Suchen}}}</span> 
+
+      {{{/form}}}
+    </div><!-- close div col-sm-8 --> 
+    <div class="col-sm-4" style='border-left:1px solid #ddd;'>
+  			<h1>Hilfe</h1>
+  			<p>Hier steht ein hilfreicher Hilfetext.</p>
+  			<p>
+  				<ul>
+  					<li>Bla bla bla</li>
+  					<li>Bla bla bla</li>
+  				</ul>
+  			</p>
+    </div>
+    </div>
+  </div><!-- close  main row-->
+</div><!-- close main container -->

@@ -1,0 +1,365 @@
+    <?php
+/* ----------------------------------------------------------------------
+ * themes/default/views/bundles/ca_objects_default_html.php : 
+ * ----------------------------------------------------------------------
+ * CollectiveAccess
+ * Open-source collections management software
+ * ----------------------------------------------------------------------
+ *
+ * Software by Whirl-i-Gig (http://www.whirl-i-gig.com)
+ * Copyright 2013-2015 Whirl-i-Gig
+ *
+ * For more information visit http://www.CollectiveAccess.org
+ *
+ * This program is free software; you may redistribute it and/or modify it under
+ * the terms of the provided license as published by Whirl-i-Gig
+ *
+ * CollectiveAccess is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTIES whatsoever, including any implied warranty of 
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+ *
+ * This source code is free and modifiable under the terms of 
+ * GNU General Public License. (http://www.gnu.org/copyleft/gpl.html). See
+ * the "license.txt" file for details, or visit the CollectiveAccess web site at
+ * http://www.CollectiveAccess.org
+ *
+ * ----------------------------------------------------------------------
+ */
+ 
+    $t_object =             $this->getVar("item");
+    $va_comments =          $this->getVar("comments");
+    $va_tags =              $this->getVar("tags_array");
+    $vn_comments_enabled =  $this->getVar("commentsEnabled");
+    $vn_share_enabled =     $this->getVar("shareEnabled");
+
+?>
+
+<div class='col-xs-12 navTop'><!--- Navigation; only shown at small screen size -->
+        {{{previousLink}}}{{{resultsLink}}}{{{nextLink}}}
+    </div> <!-- end Navgigation small Screensize -->
+<div class='navLeftRight col-xs-1 col-sm-1 col-md-1 col-lg-1'> <!-- Navigation -->
+    <div class="detailNavBgLeft">
+            {{{nextLink}}}{{{resultsLink}}}{{{previousLink}}}
+    </div><!-- end detailNavBgLeft -->
+</div><!-- end Navgigation -->
+
+<div class="row" style="margin-bottom: 25px;"><!-- Das ist die Row in der der ganze Inhalt steht -->
+
+    <div class='col-xs-12 col-sm-10 col-md-10 col-lg-10' style="border:0px solid black; margin-bottom: 25px"> <!-- Titel -->
+        <H1 style="text-align:center;padding-bottom: 1em">{{{<unit relativeTo="ca_collections" delimiter="<br/>"><a href="/frontend/index.php/Browse/objects/facet/sammlung/id/^ca_collections.collection_id">^ca_collections.preferred_labels.name</a></unit><ifcount min="1" code="ca_collections"> ➔ </ifcount>}}}{{{ca_objects.preferred_labels.name}}}</H1>
+        <div class="container">
+            <div class="row">
+            <div class='col-sm-6 col-md-6 col-lg-5 col-lg-offset-1'> <!-- Bild -->
+                {{{representationViewer}}}
+                {{{<ifdef code="ca_object_representations.rights.rightsHolder" min="1">© Bild: ^ca_object_representations.rights.rightsHolder</ifdef>}}}
+                <div id="detailAnnotations"></div>
+                
+                <?php print caObjectRepresentationThumbnails($this->request, $this->getVar("representation_id"), $t_object, array("returnAs" => "bsCols", "linkTo" => "carousel", "bsColClasses" => "smallpadding col-sm-3 col-md-3 col-xs-4")); ?>
+                
+                <?php
+                                # Comment and Share Tools
+                                if ($vn_comments_enabled | $vn_share_enabled) {
+                                        
+                                    print '<div id="detailTools">';
+                                    if ($vn_comments_enabled) {
+                ?>              
+                <div class="detailTool"><a href='#' onclick='jQuery("#detailComments").slideToggle(); return false;'><span class="glyphicon glyphicon-comment"></span>Kommentare und Tags (<?php print sizeof($va_comments) + sizeof($va_tags); ?>)</a></div><!-- end detailTool -->
+                <div id='detailComments'><?php print $this->getVar("itemComments");?></div><!-- end itemComments -->
+                <?php               
+                                    }
+                                    if ($vn_share_enabled) {
+                                        print '<div class="detailTool"><span class="glyphicon glyphicon-share-alt"></span>'.$this->getVar("shareLink").'</div><!-- end detailTool -->';
+                                    }
+                                    print '</div><!-- end detailTools -->';
+                                }               
+                ?>
+
+            </div><!-- end Bild col -->         
+    <div class='col-sm-6 col-md-6 col-lg-5' style="border:0px solid black;background: #F8F8F8;"> <!-- Metadatenanzeige -->
+        <!-- Objekttyp 
+            <H5>{{{<unit>^ca_objects.type_id</unit>}}}</H5><HR>
+          -->
+        <!-- Idno / Signatur -->    
+                {{{<ifdef code="ca_objects.idno"><h5>ID</H5>^ca_objects.idno<br/><HR></ifdef>}}}
+                    Permalink: {{{<a href="http://nbn-resolving.org/^ca_objects.urn">http://nbn-resolving.org/^ca_objects.urn</a>}}}<br />
+                    URN: {{{^ca_objects.urn}}}   
+        <!-- Alte Signatur -->
+                {{{<ifdef code="ca_objects.signatur"><H5>Alte Signatur</H5>^ca_objects.signatur<br/><HR></ifdef>}}}  
+        
+        
+        <!-- Giesbrecht -->
+                {{{<ifcount code="ca_list_items" min="1">
+                    <H5>Kategorien Sammlung Prof. Dr. Giesbrecht</H5>
+                        <unit relativeTo="ca_list_items" restrictToRelationshipTypes="kategorie" ><a href="/frontend/index.php/Browse/objects/facet/sammlungkategorien/id/^ca_list_items.item_id">^ca_list_items.preferred_labels</a></unit>
+                        <ifcount code="ca_list_items.kategorientexte" min="1"> (<unit relativeTo="ca_list_items" restrictToRelationshipTypes="kategorie"><a href="/frontend/index.php/Detail/terms/^ca_list_items.idno"><i class="fa fa-book"></i></a></unit>)</ifcount><HR>
+                   </ifcount>}}}
+        <!-- DATUM -->              
+                {{{<ifdef code="ca_objects.date"><H5>Datierung</H5><unit relativeTo="ca_objects.date" delimiter="<br/>">^ca_objects.date.dc_dates_types ^ca_objects.date.dates_value</unit><HR></ifdef>}}}
+        <!-- Kommentar -->
+                {{{<ifdef code="ca_objects.kommentar"><H5>Kommentar</H5>^ca_objects.kommentar<br/><HR></ifdef>}}}
+        <!-- Absender/Adressort ALT-->
+                {{{<ifdef code="ca_objects.geo_absende_adress.geo_absender"><H5>Absenderort</H5>^ca_objects.geo_absende_adress.geo_absender<br/><HR></ifdef>}}}
+                {{{<ifdef code="ca_objects.geo_absende_adress.geo_adress"><H5>Adressort</H5>^ca_objects.geo_absende_adress.geo_adress<br/><HR></ifdef>}}}
+        <!-- Abgebildeter Ort ALT -->
+                <!-- {{{<ifdef code="ca_objects.abgebildete_orte"><H5>Abgebildete Orte</H5>^ca_objects.abgebildete_orte.orte<br/><HR></ifdef>}}}-->
+        <!-- Beschreibung -->
+                {{{<ifdef code="ca_objects.bildbeschreibung"><H5>Bildbeschreibung</H5><span class="trimText">^ca_objects.bildbeschreibung</span><HR></ifdef>}}}
+        <!-- Beschriftung -->
+        {{{<ifdef code="ca_objects.beschriftung_gedruckt"><H5>Bildbeschriftung</H5>
+                <ifdef code="ca_objects.beschriftung_gedruckt.beschriftung_gedruck_vorder">Gedruckte Beschriftung der Vorderseite:<br><span class="trimText"><blockquote>^ca_objects.beschriftung_gedruckt.beschriftung_gedruck_vorder</blockquote></span></ifdef>
+                <ifdef code="ca_objects.beschriftung_nutzer.beschriftung_nutzer_vorder">Handschriftlicher Text auf der Vorderseite:<br><span class="trimText"><blockquote>^ca_objects.beschriftung_nutzer.beschriftung_nutzer_vorder</blockquote></span></ifdef>
+                <ifdef code="ca_objects.beschriftung_gedruckt.beschriftung_gedruckt_rueck">Gedruckte Beschriftung der Rückseite:<br><span class="trimText"><blockquote>^ca_objects.beschriftung_gedruckt.beschriftung_gedruckt_rueck</blockquote></span></ifdef>
+                <ifdef code="ca_objects.beschriftung_nutzer.beschriftung_nutzer_rueck">Handschriftlicher Text auf der Rückseite:<br><span class="trimText"><blockquote>^ca_objects.beschriftung_nutzer.beschriftung_nutzer_rueck</blockquote></span></ifdef>
+        <HR></ifdef>}}}
+        <!-- Literatur -->
+                {{{<ifdef code="ca_objects.literatur"><H5>Literatur</H5><span class="trimText">^ca_objects.literatur</span><HR></ifdef>}}}
+                {{{<ifdef code="ca_objects.external_link"><H5>Weiterführende Links</H5><a href="^ca_objects.external_link.external_link_url">^ca_objects.external_link.external_link_text</a><HR></ifdef>}}}
+        <!-- KARTENTYPUS -->
+                {{{<ifcount code="ca_list_items" restrictToRelationshipTypes="kartentypus" min="1"><H5>Kartentypus</H5>
+                       <unit relativeTo="ca_list_items" restrictToRelationshipTypes="kartentypus" delimiter="<br/>">^ca_list_items.preferred_labels</unit><HR>
+                </ifcount>}}}
+        <!-- PERSONEN -->       
+                {{{<ifcount code="ca_entities" min="1">
+                        <unit relativeTo="ca_entities" restrictToRelationshipTypes="contributor" delimiter=" "><H5>Beiträger_in</H5><l>^ca_entities.preferred_labels.displayname</l><HR></unit>               
+                        <unit relativeTo="ca_entities" restrictToRelationshipTypes="fotograf" delimiter=" "><H5>Fotograf_in</H5><l>^ca_entities.preferred_labels.displayname</l><HR></unit>                
+                        <unit relativeTo="ca_entities" restrictToRelationshipTypes="hersteller_vorlage" delimiter=" "><H5>Hersteller_in der Vorlage</H5><l>^ca_entities.preferred_labels.displayname</l><HR></unit>                
+                        <unit relativeTo="ca_entities" restrictToRelationshipTypes="lithograph" delimiter=" "><H5>Litograph_in</H5><l>^ca_entities.preferred_labels.displayname</l><HR></unit> 
+                        <unit relativeTo="ca_entities" restrictToRelationshipTypes="scherenschneider" delimiter=" "><H5>Scherenschneider_in</H5><l>^ca_entities.preferred_labels.displayname</l><HR></unit>                
+                        <unit relativeTo="ca_entities" restrictToRelationshipTypes="source" delimiter=" "><H5>Quelle</H5><l>^ca_entities.preferred_labels.displayname</l><HR></unit>                
+                        <unit relativeTo="ca_entities" restrictToRelationshipTypes="verfasser" delimiter=" "><H5>Verfasser_in</H5><l>^ca_entities.preferred_labels.displayname</l><HR></unit>                
+                        <unit relativeTo="ca_entities" restrictToRelationshipTypes="geistiger_schoepfer" delimiter=" "><H5>Geistiger Schöpfer_in</H5><l>^ca_entities.preferred_labels.displayname</l><HR></unit>     
+                    </ifcount>}}}
+            <!-- maler_zeichner -->
+                {{{<ifcount code="ca_entities" restrictToRelationshipTypes="maler_zeichner" min="1" max="1">
+                   <unit relativeTo="ca_entities" restrictToRelationshipTypes="maler_zeichner" delimiter=" "><H5>Maler/Zeichner_in</H5><l>^ca_entities.preferred_labels.displayname</l><HR></unit>
+               </ifcount>}}}
+                 {{{<ifcount code="ca_entities" restrictToRelationshipTypes="maler_zeichner" min="2">
+                   <H5>Maler/Zeichner_innen</H5><unit relativeTo="ca_entities" restrictToRelationshipTypes="maler_zeichner" delimiter="</br>"><l>^ca_entities.preferred_labels.displayname</l></unit><HR>
+               </ifcount>}}}
+            <!-- textdichter -->
+                {{{<ifcount code="ca_entities" restrictToRelationshipTypes="textdichter" min="1" max="1">
+                   <unit relativeTo="ca_entities" restrictToRelationshipTypes="textdichter" delimiter=" "><H5>Textdichter_in</H5><l>^ca_entities.preferred_labels.displayname</l><HR></unit>
+               </ifcount>}}}
+                 {{{<ifcount code="ca_entities" restrictToRelationshipTypes="textdichter" min="2">
+                   <H5>Textdichter_innen</H5><unit relativeTo="ca_entities" restrictToRelationshipTypes="textdichter" delimiter="</br>"><l>^ca_entities.preferred_labels.displayname</l></unit><HR>
+               </ifcount>}}}
+            <!-- komponist -->
+                {{{<ifcount code="ca_entities" restrictToRelationshipTypes="komponist" min="1" max="1">
+                   <unit relativeTo="ca_entities" restrictToRelationshipTypes="komponist" delimiter=" "><H5>Komponist_in</H5><l>^ca_entities.preferred_labels.displayname</l><HR></unit>
+               </ifcount>}}}
+                 {{{<ifcount code="ca_entities" restrictToRelationshipTypes="komponist" min="2">
+                   <H5>Komponist_innen</H5><unit relativeTo="ca_entities" restrictToRelationshipTypes="komponist" delimiter="</br>"><l>^ca_entities.preferred_labels.displayname</l></unit><HR>
+               </ifcount>}}}
+            <!-- Schenker -->
+                {{{<ifcount code="ca_entities" restrictToRelationshipTypes="schenker" min="1" max="1">
+                   <H5>Schenker_in</H5><unit relativeTo="ca_entities" restrictToRelationshipTypes="schenker" delimiter=" "><l>^ca_entities.preferred_labels.displayname</l><HR></unit>
+               </ifcount>}}}
+                 {{{<ifcount code="ca_entities" restrictToRelationshipTypes="schenker" min="2">
+                   <H5>Schenker_innen</H5><unit relativeTo="ca_entities" restrictToRelationshipTypes="schenker" delimiter="</br>"><l>^ca_entities.preferred_labels.displayname</l></unit><HR>
+               </ifcount>}}}
+            <!-- Hersteller -->
+                {{{<ifcount code="ca_entities" restrictToRelationshipTypes="creator" min="1" max="1">
+                   <unit relativeTo="ca_entities" restrictToRelationshipTypes="creator" delimiter=" "><H5>Hersteller</H5><l>^ca_entities.preferred_labels.displayname</l><HR></unit>
+               </ifcount>}}}
+                 {{{<ifcount code="ca_entities" restrictToRelationshipTypes="creator" min="2">
+                   <H5>Hersteller</H5><unit relativeTo="ca_entities" restrictToRelationshipTypes="creator" delimiter="</br>"><l>^ca_entities.preferred_labels.displayname</l></unit><HR>
+               </ifcount>}}}
+        <!-- Abgebildete Person/Personen -->
+                {{{<ifcount code="ca_entities" restrictToRelationshipTypes="ist_abgebildet" min="1" max="1">
+                   <unit relativeTo="ca_entities" restrictToRelationshipTypes="ist_abgebildet" delimiter=" "><H5>Abgebildete Person</H5><l>^ca_entities.preferred_labels.displayname</l><HR></unit>
+               </ifcount>}}}
+                 {{{<ifcount code="ca_entities" restrictToRelationshipTypes="ist_abgebildet" min="2">
+                   <H5>Abgebildete Personen</H5><unit relativeTo="ca_entities" restrictToRelationshipTypes="ist_abgebildet" delimiter="</br>"><l>^ca_entities.preferred_labels.displayname</l></unit><HR>
+               </ifcount>}}}
+        <!-- ORTE -->
+                {{{<ifcount code="ca_places" min="1" max="1"><H5>Verknüpfter Ort</H5></ifcount>}}}
+                {{{<ifcount code="ca_places" min="2"><H5>Verknüpfte Orte</H5></ifcount>}}}
+                {{{<unit relativeTo="ca_places" delimiter="<br/>"><l>^ca_places.preferred_labels.name</l> (^relationship_typename)</unit>}}}
+                {{{map}}}
+                {{{<ifcount code="ca_places" min="1"><hr></ifcount>}}} <!-- Eine HR ur wenn die Karte angezeigt wird (es einen verknüpften Ort gibt) -->
+        <!-- Schlagwörter, AAT, ICONCLASS, LCSH -->
+                 <!--
+                 {{{<ifcount code="ca_list_items" restrictToRelationshipTypes="schlagwort" min="1">    
+                        <H5>Verknüpfte Schlagwörter (Link zu Detailseite)</H5>
+                        <ul>
+                        <li><unit relativeTo="ca_list_items" restrictToRelationshipTypes="schlagwort" delimiter="<li>"><l>^ca_list_items.hierarchy.preferred_labels.name_singular%delimiter=_➔_</l></unit>
+                        </ul>
+                    <HR></ifcount>}}}
+                -->
+                    {{{<ifcount code="ca_list_items" restrictToRelationshipTypes="schlagwort" min="1">    
+                        <H5>Verknüpfte Schlagwörter</H5>
+                        <ul>
+                        <li><unit relativeTo="ca_list_items" restrictToRelationshipTypes="schlagwort" delimiter="<li>"><a href="/frontend/index.php/Browse/objects/facet/schlagworte/id/^ca_list_items.item_id">^ca_list_items.preferred_labels.name_singular%delimiter=_➔_</a>
+                            <!-- 
+                            <button
+                              data-toggle="popover"
+                              data-content="<a href='^ca_list_items.externe_websites_listen.gnd_links'>GND</a><br /><a href='^ca_list_items.externe_websites_listen.wikipedia_listenlelement.fullurl'>Wikipedia</a><br /><a href='^ca_list_items.externe_websites_listen.viaf_links'>VIAF</a>"
+                              data-html="true">
+                              <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                            </button>
+                             -->
+                    </unit>
+                        </ul>
+                    <HR></ifcount>}}}
+                   
+                    {{{<ifcount code="ca_objects.aat" min="1">
+                        <H5>AAT</H5>
+                        <ul>
+                        <li><unit relativeTo="ca_objects.aat.url" delimiter="<li>"><a href="^ca_objects.aat.url" target="_blank">^ca_objects.aat</a></l></unit>
+                        </ul>
+                        <HR></ifcount>}}}
+
+                    {{{<ifcount code="ca_objects.lcsh_terms" min="1">    
+                        <H5>Library of Congress Subject Headings</H5>
+                          <ul>
+                          <?php 
+                          // get metadata element lcsh_terms with structure as array
+                          $lcshterms = $t_object->get("ca_objects.lcsh_terms", array('returnWithStructure' => true));
+                            // iterate over nested arrays
+                            foreach ($lcshterms AS $ebene1) {
+                              foreach ($ebene1 AS $ebene2) {
+                                //get string
+                                $str = $ebene2['lcsh_terms'];
+                                // regex string to get term only
+                                $rename = '/(.+?)\[.*/m';
+                                $substname = '$1';
+                                $name = preg_replace($rename, $substname, $str);
+                                // regex string to get id only
+                                $reurl = '/(.+?)\[(.*)(\])/m';
+                                $substurl = '$2';
+                                $rawurl = preg_replace($reurl, $substurl, $str);
+                                // str_replace id to get URL
+                                $url = str_replace('info:lc', 'http://id.loc.gov', $rawurl);
+                                // output name as link to URL:
+                                echo "<li><a href=\"".$url. "\" target=\"_blank\">".$name. "</a>";
+                              }
+                          }
+                          ?>
+                           </ul>
+                        <HR></ifcount>}}}
+                    
+                    {{{<ifcount code="ca_objects.iconclass" min="1">    
+                        <H5>Iconclass</H5>
+                        <ul>
+                            <li><unit relativeTo="ca_objects.iconclass.url" delimiter="<li>"><a href="^ca_objects.iconclass.url" target="_blank">^ca_objects.iconclass</a></unit>
+                        </ul>
+                        <HR>
+                    </ifcount>}}}
+                          
+        <!-- NORMINCIPITS -->
+                {{{<ifcount code="ca_occurrences" restrictToTypes="normincipit" max="1">
+                    <unit relativeTo="ca_occurrences" restrictToTypes="normincipit"><H5>Normincipit</H5><l>^ca_occurrences.preferred_labels</l>
+                    <HR></unit>
+                </ifcount>}}}
+                {{{<ifcount code="ca_occurrences" restrictToTypes="normincipit" min="2">
+                    <H5>Normincipits</H5>
+                    <unit relativeTo="ca_occurrences" restrictToTypes="normincipit" delimiter="<br>"><l>^ca_occurrences.preferred_labels</l>
+                    </unit><HR>
+                </ifcount>}}}
+        <!-- SERIE & Seriennumer-->
+                {{{<ifcount code="ca_occurrences" restrictToTypes="serie" min="1">
+                    <unit relativeTo="ca_occurrences" restrictToTypes="serie" delimiter="<br/>">
+                        <H5>Serie</H5>
+                        <l>^ca_occurrences.preferred_labels</l>
+                    </unit>
+                    <unit relativeTo="ca_objects">^ca_objects.seriennummer</unit>
+                <HR>
+                </ifcount>}}}
+        <!-- FRANKIERUNG -->
+                <H5>Frankierung und Postweg</H5>
+                    <ul>
+                        {{{<ifcount code="ca_list_items" min="1"><unit relativeTo="ca_list_items" restrictToRelationshipTypes="frankierung" delimiter="</br>"><li><a href="/frontend/index.php/Browse/objects/facet/frankierung/id/^ca_list_items.item_id"> ^ca_list_items.preferred_labels.name_singular</a></unit></ifcount>}}}                      
+                        {{{<ifcount code="ca_list_items" min="1"><unit relativeTo="ca_list_items" restrictToRelationshipTypes="gestempelt" delimiter="</br>"><li><a href="/frontend/index.php/Browse/objects/facet/stempel/id/^ca_list_items.item_id">^ca_list_items.preferred_labels.name_singular</a></unit></ifcount>}}}                     
+                        {{{<ifcount code="ca_list_items" min="1"><unit relativeTo="ca_list_items" restrictToRelationshipTypes="feldpost" delimiter="</br>"><li><a href="/frontend/index.php/Browse/objects/facet/feldpost/id/^ca_list_items.item_id">^ca_list_items.preferred_labels.name_singular</a></unit></ifcount>}}}                     
+                        {{{<ifcount code="ca_list_items" min="1"><unit relativeTo="ca_list_items" restrictToRelationshipTypes="beschrieben" delimiter="</br>"><li><a href="/frontend/index.php/Browse/objects/facet/beschrieben/id/^ca_list_items.item_id">^ca_list_items.preferred_labels.name_singular</a></unit></ifcount>}}}                                                             
+                    </ul>
+                    <HR>
+        <!-- BESCHAFFENHEIT -->
+                <H5>Beschaffenheit</H5>
+                    <ul>
+                        {{{<ifcount code="ca_list_items" restrictToRelationshipTypes="drucktechnik" min="1"><li><unit relativeTo="ca_list_items" restrictToRelationshipTypes="drucktechnik" delimiter="</br>">^ca_list_items.preferred_labels.name_singular</unit></ifcount>}}}                      
+                        {{{<ifcount code="ca_list_items" restrictToRelationshipTypes="material" min="1"><li><unit relativeTo="ca_list_items" restrictToRelationshipTypes="material" delimiter="<li>">^ca_list_items.preferred_labels.name_singular</unit></ifcount>}}}                     
+                        {{{<ifcount code="ca_list_items" restrictToRelationshipTypes="besonderheit_druck" min="1"><li><unit relativeTo="ca_list_items" restrictToRelationshipTypes="besonderheit_druck" delimiter="<li>">^ca_list_items.preferred_labels.name_singular</unit></ifcount>}}}                     
+                    </ul>
+
+                <!-- Maße -->        
+                {{{<ifdef code="ca_objects.measure">
+                    <h5>Maße</h5>
+                    <!-- Breite: ^ca_objects.measure.breite1~units:cm<br>Länge: ^ca_objects.measure.laenge1~units:cm<HR> -->
+                    <?php
+                        $length = $t_object->get("ca_objects.measure.breite1", array("returnAsDecimalMetric"=>true)); 
+                        if($length) {
+                            print "Breite: ".($length*100)." cm <br>";
+                        }
+                    ?>
+                    <?php
+                        $length = $t_object->get("ca_objects.measure.laenge1", array("returnAsDecimalMetric"=>true)); 
+                        if($length) {
+                            print "Länge: ".($length*100)." cm";
+                        }
+                    ?>
+                    <HR>
+                    </ifdef>}}}
+        <!-- Dublette -->            
+                    {{{<ifcount code="ca_objects.related" min="1">
+                            <HR>
+                            <h5>Dublette</h5>
+                            <ul>
+                                <li>
+                                <a href="/frontend/index.php/Detail/objects/^ca_objects.related.idno">^ca_objects.related.preferred_labels (^ca_objects.related.idno)</a>
+                            </ul>
+                        </ifcount>}}}
+        <!-- Copyright/Rechte -->
+                <HR><h5>Copyright</h5>
+               {{{
+                  <ifdef code="ca_objects.rights">
+                    <ifdef code="ca_objects.rights.rechtemodell"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.de" target="_blank">^ca_objects.rights.rechtemodell</a> (Metadaten)</ifdef>
+                    <ifdef code="ca_objects.rights.rightsHolder">: ^ca_objects.rights.rightsHolder</ifdef>
+                    <ifdef code="ca_objects.rights.copyrightstatement"> (^ca_objects.rights.copyrightstatement)</ifdef><br>
+                  </ifdef>
+                }}}
+                {{{
+                  <ifdef code="ca_object_representations.rights">
+                    <ifdef code="ca_object_representations.rights.rechtemodell">^ca_object_representations.rights.rechtemodell (Bild)</ifdef>
+                    <ifdef code="ca_object_representations.rights.rightsHolder">: ^ca_object_representations.rights.rightsHolder</ifdef>
+                    <ifdef code="ca_object_representations.rights.copyrightstatement"> (^ca_object_representations.rights.copyrightstatement)</ifdef>
+                  </ifdef>
+                }}}
+                <hr>
+                  
+                <!-- Bearbeiten Link -->
+                <p style="text-align: right; font-size: 10pt"><i>{{{<a href="--url--/backend/index.php/editor/objects/ObjectEditor/Edit/object_id/^ca_objects.object_id" target="_blank"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>}}}</i></p>
+        <!-- DFG Viewer Code
+            <?php
+                $id = $t_object->get('ca_objects.object_id');
+                $link = '/backend/service.php/OAI/bpk?verb=GetRecord&identifier=oai:vm240.rz.uos.de:'.$id.'&metadataPrefix=mets';
+                echo '<a href="http://dfg-viewer.de/show/?tx_dlf[id]='.urlencode($link).'">DFG Viewer</a>'
+            ?>
+        -->
+            </div><!-- end col -->
+</div><!-- end row -->
+
+
+
+
+<!-- Navigation next <div class='navLeftRight col-xs-1 col-sm-1 col-md-1 col-lg-1'><div class="detailNavBgRight">{{{nextLink}}}</div></div>-->
+
+    </div><!-- end container -->
+
+
+    </div><!-- end col -->
+    </div><!-- end row -->
+<script type='text/javascript'>
+    jQuery(document).ready(function() {
+        $('.trimText').readmore({
+          speed: 75,
+          maxHeight: 100
+        });
+    });
+</script>
+<script>
+$(document).ready(function(){
+    $('[data-toggle="popover"]').popover({html:true}); 
+});
+</script>
+

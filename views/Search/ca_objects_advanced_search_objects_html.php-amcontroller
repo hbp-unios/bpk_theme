@@ -1,0 +1,102 @@
+<?php
+require_once(__CA_MODELS_DIR__."/ca_sets.php");
+include_once(__CA_LIB_DIR__."/ca/Search/OccurrenceSearch.php");
+include_once(__CA_LIB_DIR__."/ca/Search/ObjectSearch.php");
+include_once(__CA_MODELS_DIR__."/ca_occurrences.php");
+$va_access_values = caGetUserAccessValues($this->request);
+    if($vs_set_code = $this->request->config->get("featured_art_set")){
+        AssetLoadManager::register("carousel");
+        $t_set = new ca_sets();
+        $t_set->load(array('set_code' => $vs_set_code));
+        # Enforce access control on set
+        if((sizeof($va_access_values) == 0) || (sizeof($va_access_values) && in_array($t_set->get("access"), $va_access_values))){
+            $va_item_ids = array_keys(is_array($va_tmp = $t_set->getItemRowIDs(array('checkAccess' => $va_access_values, 'shuffle' => 0))) ? $va_tmp : array());
+        }
+        if(is_array($va_item_ids) && sizeof($va_item_ids)){
+            $t_object = new ca_objects();
+            $va_item_media = $t_object->getPrimaryMediaForIDs($va_item_ids, array("slideshowsmall"), array('checkAccess' => caGetUserAccessValues($this->request)));
+        }
+    }   
+?>
+<div class="container">
+	<div class="row">
+		<div class="col-sm-8 ">
+			<h1>Erweiterte Suche: Postkarten</h1>
+      <p>Bitte geben Sie Ihre Suchbegriffe in die Maske ein.</p>
+
+    <form action='/frontend/index.php/Search/objects' method='post' id='caAdvancedSearch' target='_top' enctype='multipart/form-data'>
+      <input type='hidden' name='_formName' value='caAdvancedSearch'/>
+      
+      <script type='text/javascript'>jQuery(document).ready(
+                function() {
+                    jQuery('#caAdvancedSearch').keydown(function(e) { 
+                       if(e && e.keyCode == 13)
+                       {
+                          jQuery('#caAdvancedSearch').submit();
+                       }
+                    });
+                }
+            );</script>
+      <div class='advancedContainer'>
+          <div class='row'><!-- Search Row -->
+
+              
+              <div class="advancedSearchField col-sm-6"><!-- Suchfeld Alte Signatur -->
+                  Titel:<br/>
+                  <input name='ca_objects.signatur[]' wrap='soft' class='' id='ca_objects.signatur[]' style='width: 100%'></input>
+                  <input name='ca_objects.signatur_label' value='Alte Signatur' type='hidden'/>
+              </div><!-- close Suchfeld Alte Signatur -->
+
+          </div><!-- close Search Row -->
+        </div><!-- close advanced container --> 
+
+        
+        <div style="float: right; margin-left: 20px;"><i class="fa fa-undo" aria-hidden="true"></i> <a href='#' class='caAdvancedSearchFormReset'>Zurücksetzen</a></div>
+        <div style="float: right;"><i class="fa fa-search" aria-hidden="true"></i> <a href='#' class='caAdvancedSearchFormSubmit'>Suchen</a></div> 
+        <!-- Script, das die Suchanfrage zusammenbaut -->
+        <script type='text/javascript'>
+            jQuery('.caAdvancedSearchFormSubmit').bind('click', function() {
+                jQuery('#caAdvancedSearch').submit();
+                return false;
+            });
+            jQuery('.caAdvancedSearchFormReset').bind('click', function() {
+                jQuery('#caAdvancedSearch').find('input[type!="hidden"],textarea').val('');
+                jQuery('#caAdvancedSearch').find('input.lookupBg').val('');
+                jQuery('#caAdvancedSearch').find('select.caAdvancedSearchBoolean').val('AND');
+                jQuery('#caAdvancedSearch').find('select').prop('selectedIndex', 0);
+                return false;
+            });
+            jQuery(document).ready(function() {
+                var f, defaultValues = null, defaultBooleans = null;
+                for (f in defaultValues) {
+                    var f_proc = f + '[]';
+                    jQuery('input[name="' + f_proc+ '"], textarea[name="' + f_proc+ '"], select[name="' + f_proc+ '"]').each(function(k, v) {
+                        if (defaultValues[f][k]) { jQuery(v).val(defaultValues[f][k]); } 
+                    });
+                }
+                for (f in defaultBooleans) {
+                    var f_proc = f + '[]';
+                    jQuery('select[name="' + f_proc+ '"].caAdvancedSearchBoolean').each(function(k, v) {
+                        if (defaultBooleans[f][k]) { jQuery(v).val(defaultBooleans[f][k]); }
+                    });
+                }
+            });
+            </script>
+        <input name='_advancedFormName' value='objects' type='hidden'/>
+        <input name='_formElements' value='form|ca_objects.signatur|/form' type='hidden'/>
+        <input name='_advanced' value='1' type='hidden'/>
+    </form>
+    </div><!-- close div col-sm-8 --> 
+    <div class="col-sm-4" style='border-left:1px solid #ddd;'>
+  			<h1>Hilfe</h1>
+  			<p>Hier steht ein hilfreicher Hilfetext.</p>
+  			<p>
+  				<ul>
+  					<li>Bla bla bla</li>
+  					<li>Bla bla bla</li>
+  				</ul>
+  			</p>
+    </div>
+    </div>
+  </div><!-- close  main row-->
+</div><!-- close main container -->
